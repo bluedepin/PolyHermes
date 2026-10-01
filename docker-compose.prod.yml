@@ -1,23 +1,11 @@
 version: '3.8'
 
-# PolyHermes 生产环境部署配置
-# 使用 Docker Hub 官方镜像，无需本地构建
-# 
-# 使用方法：
-# 1. 创建 .env 文件（参考下方配置）
-# 2. 运行: docker-compose -f docker-compose.prod.yml up -d
-#
-# 注意：
-# - JWT_SECRET 和 ADMIN_RESET_PASSWORD_KEY 不能使用默认值
-# - 请使用 openssl rand -hex 生成安全的随机密钥
-
 services:
   app:
-    # 使用 Docker Hub 官方镜像
     image: wrbug/polyhermes:latest
     container_name: polyhermes
     ports:
-      - "${SERVER_PORT:-80}:80"
+      - "127.0.0.1:${SERVER_PORT:-18080}:80"
     environment:
       - TZ=${TZ:-Asia/Shanghai}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
@@ -25,16 +13,10 @@ services:
       - DB_USERNAME=${DB_USERNAME:-root}
       - DB_PASSWORD=${DB_PASSWORD:-}
       - SERVER_PORT=8000
-      # ⚠️ 安全警告：以下两个环境变量不能使用默认值，否则容器启动会失败
-      # 请在 .env 文件中设置，或通过环境变量传入
-      # 生成随机密钥：openssl rand -hex 32 (ADMIN_RESET_PASSWORD_KEY) 或 openssl rand -hex 64 (JWT_SECRET)
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
       - ADMIN_RESET_PASSWORD_KEY=${ADMIN_RESET_PASSWORD_KEY:-change-me-in-production}
-      # 日志级别配置（可选，默认值：root=WARN, app=INFO）
-      # 可选值：TRACE, DEBUG, INFO, WARN, ERROR, OFF
       - LOG_LEVEL_ROOT=${LOG_LEVEL_ROOT:-WARN}
       - LOG_LEVEL_APP=${LOG_LEVEL_APP:-INFO}
-      # 动态更新配置
       - ALLOW_PRERELEASE=${ALLOW_PRERELEASE:-false}
       - GITHUB_REPO=${GITHUB_REPO:-WrBug/PolyHermes}
     volumes:
@@ -50,7 +32,7 @@ services:
     image: mysql:8.2
     container_name: polyhermes-mysql
     ports:
-      - "${MYSQL_PORT:-3307}:3306"
+      - "127.0.0.1:${MYSQL_PORT:-13307}:3306"
     environment:
       - TZ=${TZ:-Asia/Shanghai}
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-rootpassword}
@@ -75,4 +57,3 @@ volumes:
 networks:
   polyhermes-network:
     driver: bridge
-
